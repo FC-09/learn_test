@@ -192,7 +192,7 @@ int Country::OpenFile(const char* file_path)
     char* name = new char[100];
     if (file = fopen(file_path, "rb"))
     {
-        fscanf(file, "%s%/0%d", &name, &member);
+        fscanf(file, "%s%/0%d", name, member);
         residenceInfo_.clear();
         int a = 0;
         std::string n;
