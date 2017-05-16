@@ -25,6 +25,8 @@ public:
 
     int* Savefile();    // 保存户中成员
 
+    char* SaveName();     // 保存户主名
+
 private:
     std::string name_;			//户主名
     const int residenceNo_;		//户号

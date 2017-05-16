@@ -149,26 +149,37 @@ int Country::SaveFile(const char* file_path)
 {
     FILE* file;
     int* member = new int[100];
+    char* name = new char[100];
     int i = 0;
+    char b = 0;
     for (std::map<int, Residence*>::iterator it = residenceInfo_.begin(); it != residenceInfo_.end(); ++it)
     {
         member[i] = it->first;
         ++i;
-        for (int a = 0; it->second->Savefile()[a] != 0; ++a)
+        for (int a = 0; it->second->Savefile()[a] != -1; ++a)
         {
             member[i] = it->second->Savefile()[a];
             ++i;
-            member[i] = 0;
-            ++i;
         }
+        member[i] = -1;
+        ++i;
+        for (char a = 0; it->second->SaveName()[a] != 0; ++a)
+        {
+            name[b] = it->second->SaveName()[a];
+            ++b;
+        }
+        name[b] = ',';
+        ++b;
     }
     if (file = fopen(file_path, "wb"))    //打开指定路径下文件，如果不存在，则新建此文件
     {
+        fprintf(file, "%s", name);
         fprintf(file, "%d", member);
         std::cout << "已将信息保存到指定文件中" << std::endl;
     }
     else
         std::cout << "输入的路径有误" << std::endl;
+    delete[] name;
     delete[] member;
     fclose(file);
     return 0;
@@ -178,20 +189,34 @@ int Country::OpenFile(const char* file_path)
 {
     FILE* file;
     int* member = new int[100];
+    char* name = new char[100];
     if (file = fopen(file_path, "rb"))
     {
-        //--------------------------------------
-        fscanf(file, "%d", &member);
+        fscanf(file, "%s%/0%d", &name, &member);
         residenceInfo_.clear();
-        for (int i = 0; member[i] != 0; ++i)
+        int a = 0;
+        std::string n;
+        for (char i = 0; name[i] != 0; ++i)
         {
-            member[i]
+            if (name[i] != ',')
+                n += name[i];
+            else
+            {
+                Residence* p = new Residence(member[a], n);
+                residenceInfo_[member[a]] = p;
+                for (a; member[a] != -1; ++a)
+                {
+                    if (member[a] != 0)
+                        p->AddMember(member[a]);
+                }
+                ++a;
+            }
         }
-
         std::cout << "已加载指定文件信息" << std::endl;
     }
     else
         std::cout << "打开文件失败" << std::endl;
+    delete[] name;
     delete[] member;
     fclose(file);
     return 0;

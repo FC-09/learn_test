@@ -59,10 +59,25 @@ int* Residence::Savefile()
 {
     int* member_age = new int[10];
     int i = 0;
+    member_age[i] = 0;
+    ++i;
     for (std::vector<int>::iterator it = vecAge_.begin(); it != vecAge_.end(); ++it)
     {
         member_age[i] = *it;
-        i++;
+        ++i;
+        member_age[i] = 0;
+        ++i;
     }
+    member_age[i] = -1;
     return member_age;
+}
+
+char* Residence::SaveName()
+{
+    char* name = new char[10];
+    char i = 0;
+    for (i; i<name_.length(); ++i)
+        name[i] = name_[i];
+    name[i] = '\0';
+    return name;
 }
