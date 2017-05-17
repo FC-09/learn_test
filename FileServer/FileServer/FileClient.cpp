@@ -4,8 +4,8 @@
 FileClient::FileClient(FileServer* server, SOCKET sClient)
 {
     memset(path_, 0, sizeof(char) * 100);
-    memset(recv_text_, 0, sizeof(char) * 100202);
-    memset(send_text_, 0, sizeof(char) * 100202);
+    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
+    memset(send_text_, 0, sizeof(char) * SEND_BUF_SIZE);
     client_ = sClient;
     server_ = server;
     std::thread recv(&FileClient::Run, this);
