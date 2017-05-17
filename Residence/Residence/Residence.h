@@ -23,9 +23,7 @@ public:
 
     int Size();   //判断户是否为空
 
-    int* Savefile();    // 保存户中成员
-
-    char* SaveName();     // 保存户主名
+    std::string Savefile();
 
 private:
     std::string name_;			//户主名

@@ -15,9 +15,9 @@ void Residence::DisPlay()
         return;
     }
 
-    for (int i = 0; vecAge_[i] != 0; i++)
+    for (std::vector<int>::iterator iter = vecAge_.begin(); iter != vecAge_.end(); iter++)
     {
-        std::cout << vecAge_[i] << ", ";
+        std::cout << *iter << ", ";
     }
     std::cout << std::endl;
     return;
@@ -55,29 +55,17 @@ int Residence::Size()
         return 1;
 }
 
-int* Residence::Savefile()
+std::string Residence::Savefile()
 {
-    int* member_age = new int[10];
-    int i = 0;
-    member_age[i] = 0;
-    ++i;
+    std::string member;
+    member += residenceNo_; 
+    member += '<';
+    member += name_;
+    member += '>';
     for (std::vector<int>::iterator it = vecAge_.begin(); it != vecAge_.end(); ++it)
     {
-        member_age[i] = *it;
-        ++i;
-        member_age[i] = 0;
-        ++i;
+        member += *it; 
     }
-    member_age[i] = -1;
-    return member_age;
-}
-
-char* Residence::SaveName()
-{
-    char* name = new char[10];
-    char i = 0;
-    for (i; i<name_.length(); ++i)
-        name[i] = name_[i];
-    name[i] = '\0';
-    return name;
+    member += ',';
+    return member;
 }
