@@ -147,33 +147,103 @@ int Country::ChangeMember(int residenceNo)
 
 int Country::SaveFile(const char* file_path)
 {
+    if (FILE* file = fopen(file_path, "wb"))
+    {
+        for (std::map<int, Residence*>::iterator it = residenceInfo_.begin(); it != residenceInfo_.end(); ++it)
+        {
+            if (fwrite(&it->first, sizeof(int), 1, file) != 1)
+            {
+                std::cout << "文件写入失败" << std::endl;
+                return -1;
+            }
+                
+            if (it->second->SaveFile(file) == -1)
+            {
+                std::cout << "文件写入失败" << std::endl;
+                return -1;
+            }
+        }
+        fclose(file);
+        std::cout << "文件写入成功" << std::endl;
+    }
+    else
+    {
+        std::cout << "输入的路径有误" << std::endl;
+        return -1;
+    } 
+    return 0;
+}
+
+
+    /*
     FILE* file;
     std::string member;
     char* member_file = new char[100]();
     for (std::map<int, Residence*>::iterator it = residenceInfo_.begin(); it != residenceInfo_.end(); ++it)
     {
-        member += it->second->Savefile();  
-        
+        member += it->second->Savefile();    
     }
-    for (int i = 0; i <= strlen(member.c_str()); ++i)
+    int len = member.size();
+    for (int i = 0; i < len; ++i)
     {
         member_file[i] = member[i];
     }
     if (file = fopen(file_path, "wb"))    //打开指定路径下文件，如果不存在，则新建此文件
     {
-        fwrite(member_file, 1, 100, file);
+        fwrite(member.c_str(), 1, 100, file);
         std::cout << "已将信息保存到指定文件中" << std::endl;
     }
     else
         std::cout << "输入的路径有误" << std::endl;
     delete[] member_file;
-    fclose(file);
-    return 0;
-}
-
+    fclose(file);*/
+    
 
 int Country::OpenFile(const char* file_path)
 {
+    if (FILE* file = fopen(file_path, "rb"))
+    {
+        residenceInfo_.clear();
+        int* file_buff = new int[100]();
+        fread(file_buff, sizeof(int), 100, file);
+        for (int i = 0; file_buff[i] != 0; ++i)
+        {
+            std::string name;    //户主名
+            int No = file_buff[i++];    //户号
+            int n_len = file_buff[i++];   //户主名长度
+            //添加户主名  
+            for (int n = n_len; n > 0; n--)
+            {
+                for (char m = 0; m < 4; ++m)
+                {
+                    if (n_len > 0)
+                    {
+                        name += (file_buff[i] >> m * 8);
+                        n_len--;
+                    }   
+                }
+                i++;
+            }
+            Residence* p = new Residence(No, name);
+            residenceInfo_[No] = p;
+            //添加成员年龄
+            int m_len = file_buff[i];     //成员年龄个数
+            for (int n = 0; n < m_len; ++n)
+            {
+                p->AddMember(file_buff[++i]);
+            }
+        }
+        fclose(file);
+        std::cout << "文件加载成功" << std::endl;
+    }
+    else
+    {
+        std::cout << "文件打开失败" << std::endl;
+        return -1;
+    }
+    return 0;
+}
+    /*
     FILE* file;
     char* member_file = new char[100]();
     if (file = fopen(file_path, "rb"))
@@ -208,5 +278,5 @@ int Country::OpenFile(const char* file_path)
         std::cout << "打开文件失败" << std::endl;
     delete[] member_file;
     fclose(file);
-    return 0;
-}
+    */
+   

@@ -55,9 +55,32 @@ int Residence::Size()
         return 1;
 }
 
-std::string Residence::Savefile()
+int Residence::SaveFile(FILE* f)
 {
-    std::string member;
+    int temp = name_.size();
+    //write name len
+    if (fwrite(&temp, sizeof(int), 1, f) != 1)
+        return -1;
+
+    // write name
+    if (fwrite(name_.c_str(), temp*sizeof(int), 1, f) != 1)
+        return -1;
+
+    //write Age count
+    temp = vecAge_.size();
+    if (fwrite(&temp, sizeof(int), 1, f) != 1)
+        return -1;
+
+    //wiate age
+   /* for (std::vector<int>::iterator it = vecAge_.begin(); it != vecAge_.end(); ++it)
+    {
+        if (fwrite(&(*it), sizoef(int), 1, f) != 1)
+            return -1;
+    }*/
+    return fwrite(vecAge_.data(), temp*sizeof(int), 1, f) == 1 ? 0 : -1;
+}
+
+ /*   std::string member;
     member += residenceNo_; 
     member += '<';
     member += name_;
@@ -67,5 +90,4 @@ std::string Residence::Savefile()
         member += *it; 
     }
     member += ',';
-    return member;
-}
+    return member;*/
