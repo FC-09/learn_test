@@ -201,8 +201,22 @@ int Country::SaveFile(const char* file_path)
 
 int Country::OpenFile(const char* file_path)
 {
+
+
+
     if (FILE* file = fopen(file_path, "rb"))
-    {
+    
+        while (1)
+        {
+        int id;
+        if (fread(&id, 4, 1, file) != 1)
+            return;
+        Residence* p = new Residence(No, name);
+        residenceInfo_[No] = p;
+        p->OpenFile(file);
+        }
+    /*
+    if (FILE* file = fopen(file_path, "rb"))
         residenceInfo_.clear();
         int* file_buff = new int[100]();
         fread(file_buff, sizeof(int), 100, file);
@@ -241,6 +255,7 @@ int Country::OpenFile(const char* file_path)
         std::cout << "文件打开失败" << std::endl;
         return -1;
     }
+    */
     return 0;
 }
     /*

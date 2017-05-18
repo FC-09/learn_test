@@ -25,6 +25,8 @@ public:
 
     int SaveFile(FILE* f);
 
+    int OpenFile(FILE* f);
+
 private:
     std::string name_;			//户主名
     const int residenceNo_;		//户号
