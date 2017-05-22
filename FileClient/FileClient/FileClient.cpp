@@ -102,12 +102,13 @@ void FileClient::DisplayPath()
 //下载文件
 void FileClient::DownloadFile()
 {
-    char file_name[100];
-    char file_path[100];
+    char file_name[100], file_path[100];
     memset(file_name, 0, sizeof(char) * 100);
     memset(file_path, 0, sizeof(char) * 100);
     std::cout << "请输入要下载的远程文件" << std::endl;
     std::cin >> file_name;
+    std::cout << "请输入要下载的本地路径" << std::endl;
+    std::cin >> file_path;
     for (char i = 0; file_name[i] != 0; i++)
     {
         send_text_[i + 1] = file_name[i];
@@ -122,32 +123,21 @@ void FileClient::DownloadFile()
     }
     else if (recv_text_[0] == 'o')
     {
-        char file[100000];
-        memset(file, 0, sizeof(char) * 100000);
-        for (char i = 101; recv_text_[i] != 0; i++)
+        if (FILE *fw = fopen(file_path, "wb"))
         {
-            file[i - 101] = recv_text_[i];
+            while (1)
+            {
+                if (recv(sock_, recv_text_, RECV_BUF_SIZE, 0) == 0)
+                    break;
+                fwrite(recv_text_, sizeof(char), 100, fw);
+            }
+            fclose(fw);
+            std::cout << "文件下载成功" << std::endl;
         }
-       //------------------------------------------- 
-    }
-    std::cout << "请输入要下载的本地路径" << std::endl;
-    std::cin >> file_path;
-    FILE *fw;
-    if (fw = fopen(file_path, "wb"))
-    {
-        char file[100000];
-        memset(file, 0, sizeof(char) * 100000);
-        for (char i = 101; send_text_[i] != 0; i++)
+        else
         {
-            send_text_[i] = file[i - 101];
-        }
-        fputs(file, fw);
-        fclose(fw);
-        std::cout << "文件下载成功" << std::endl;
-    }
-    else
-    {
-        std::cout << "新建文件失败" << std::endl;
+            std::cout << "新建文件失败" << std::endl;
+        } 
     }
     return;
 }
@@ -155,33 +145,23 @@ void FileClient::DownloadFile()
 //上传文件
 void FileClient::UploadFile()
 {
-    char file_name[100];
-    char file_path[100];
+    char file_name[100], file_path[100];
     memset(file_name, 0, sizeof(char) * 100);
     memset(file_path, 0, sizeof(char) * 100);
     std::cout << "请输入要上传的本地文件" << std::endl;
     std::cin >> file_name;
     std::cout << "请输入要上传的远程路径" << std::endl;
     std::cin >> file_path;
-    for (char i = 0; file_name[i] != 0; i++)
+    send(sock_, file_path, 100, 0);
+    if (FILE *fr = fopen(file_name, "rb"))
     {
-        send_text_[i + 1] = file_name[i];
-    }
-    for (char i = 0; file_path[i] != 0; i++)
-    {
-        send_text_[i + 102] = file_path[i];
-    }
-    FILE *fr;
-    if (fr = fopen(file_name, "rb"))
-    {
-        char file[100000];
-        memset(file, 0, sizeof(char) * 100000);
-        fgets(file, ftell(fr), fr);
-        fclose(fr);
-        for (char i = 203; send_text_[i] != 0; i++)
+        while (1)
         {
-            send_text_[i] = file[i - 203];
+            if (fread(send_text_, sizeof(char), SEND_BUF_SIZE, fr) == 0)
+                break;
+            send(sock_, send_text_, SEND_BUF_SIZE, 0);
         }
+        fclose(fr);
         std::cout << "文件打开成功" << std::endl;
     }
     else
@@ -189,7 +169,6 @@ void FileClient::UploadFile()
         std::cout << "文件打开失败" << std::endl;
         return;
     }
-    send(sock_, send_text_, SEND_BUF_SIZE, 0);
     recv(sock_, recv_text_, RECV_BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
