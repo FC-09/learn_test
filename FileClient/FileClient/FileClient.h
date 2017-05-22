@@ -22,7 +22,7 @@ private:
     SOCKET sock_;
     WSADATA wsa_data_;
     WORD sock_version_;
-    char recv_text_[RECV_BUF_SIZE];
-    char send_text_[SEND_BUF_SIZE];
+    char recv_text_[BUF_SIZE];
+    char send_text_[BUF_SIZE];
 };
 
