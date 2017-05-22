@@ -85,27 +85,11 @@ int FileClient::DownloadFile()
         send_text_[0] = 'n';
         return -1;
     }
-    char file_name[100];
-    memset(file_name, 0, sizeof(char) * 100);
-    if (recv_text_[101] != 0)
-    {
-        for (char i = 1; recv_text_[i] != 0; i++)
-        {
-            file_name[i - 1] = recv_text_[i];
-        }
-    }
+    recv(client_, recv_text_, RECV_BUF_SIZE, 0);
     //---------打开文件，保存并发送给客户端----------
     FILE *fr;
-    if (fr = fopen(file_name, "rb"))
+    if (fr = fopen(recv_text_, "rb"))
     {
-        char file[100000];
-        memset(file, 0, sizeof(char) * 100000);
-        fgets(file, ftell(fr), fr);
-        fclose(fr);
-        for (char i = 203; send_text_[i] != 0; i++)
-        {
-            send_text_[i] = file[i - 203];
-        }
         send_text_[0] = 'o';
     }
     else
@@ -114,6 +98,13 @@ int FileClient::DownloadFile()
         return -3;
     }
     send(client_, send_text_, SEND_BUF_SIZE, 0);
+    while (1)
+    {
+        if (fread(send_text_, sizeof(char), 100, fr) == 0)
+            break;
+        send(client_, send_text_, SEND_BUF_SIZE, 0);
+    }
+    fclose(fr);
     memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
     return 0;
 }
@@ -125,32 +116,15 @@ int FileClient::UploadFile()
         send_text_[0] = 'n';
         return -1;
     }
-    char* file_path = 0; char* file = 0;
-    if (recv_text_[1] != 0)
+    recv(client_, recv_text_, RECV_BUF_SIZE, 0);
+    if (FILE *fw = fopen(recv_text_, "wb"))
     {
-        for (char i = 1; recv_text_[i] != 0; i++)
+        while (1)
         {
-            *(file_path + i - 1) = recv_text_[i];
+            if (recv(client_, recv_text_, SEND_BUF_SIZE, 0) == 0)
+                break;
+            fwrite(recv_text_, sizeof(char), SEND_BUF_SIZE, fw);
         }
-    }
-    if (recv_text_[101] != 0)
-    {
-        for (char i = 101; recv_text_[i] != 0; i++)
-        {
-            *(file + i - 101) = recv_text_[i];
-        }
-    }
-    //----------保存文件，上传到指定路径------------
-    FILE *fw;
-    if (fw = fopen(file_path, "wb"))
-    {
-        char file[100000];
-        memset(file, 0, sizeof(char) * 100000);
-        for (char i = 101; send_text_[i] != 0; i++)
-        {
-            send_text_[i] = file[i - 101];
-        }
-        fputs(file, fw);
         fclose(fw);
         send_text_[0] = 'o';
     }
