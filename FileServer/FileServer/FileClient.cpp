@@ -38,8 +38,8 @@ int FileClient::SetPath()
             std::cout << s_text << path_ << std::endl;
         }
     }
-    send(client_, send_text_, 100202, 0);
-    memset(recv_text_, 0, sizeof(char) * 100202);
+    send(client_, send_text_, SEND_BUF_SIZE, 0);
+    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
     return 0;
 }
 
@@ -73,8 +73,8 @@ int FileClient::GetDirectory()
         }
         send_text_[0] = 'o';
     }
-    send(client_, send_text_, 100202, 0);
-    memset(send_text_, 0, sizeof(char) * 100202);
+    send(client_, send_text_, SEND_BUF_SIZE, 0);
+    memset(send_text_, 0, sizeof(char) * SEND_BUF_SIZE);
     return 0;
 }
 
@@ -113,8 +113,8 @@ int FileClient::DownloadFile()
         send_text_[0] = 'f';
         return -3;
     }
-    send(client_, send_text_, 100202, 0);
-    memset(recv_text_, 0, sizeof(char) * 100202);
+    send(client_, send_text_, SEND_BUF_SIZE, 0);
+    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
     return 0;
 }
 
@@ -158,7 +158,7 @@ int FileClient::UploadFile()
     {
         send_text_[0] = 'f';
     }
-    send(client_, send_text_, 100202, 0);
+    send(client_, send_text_, SEND_BUF_SIZE, 0);
     return 0;
 }
 
@@ -177,7 +177,7 @@ int FileClient::Run()
 {
     while (1)
     {
-        recv(client_, recv_text_, 100202, 0);
+        recv(client_, recv_text_, RECV_BUF_SIZE, 0);
         if (recv_text_[0] == 'S')
         {
             SetPath();

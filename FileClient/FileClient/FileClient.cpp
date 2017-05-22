@@ -4,8 +4,8 @@ FileClient::FileClient()
     :sock_(0)
 {
     sock_version_ = MAKEWORD(2, 2);
-    memset(recv_text_, 0, sizeof(char) * 100202);
-    memset(send_text_, 0, sizeof(char) * 100202);
+    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
+    memset(send_text_, 0, sizeof(char) * SEND_BUF_SIZE);
 }
 
 FileClient::~FileClient()
@@ -50,8 +50,8 @@ void FileClient::SetPath()
     {
         send_text_[i + 1] = path[i];
     }
-    send(sock_, send_text_, 100202, 0);
-    recv(sock_, recv_text_, 100202, 0);
+    send(sock_, send_text_, SEND_BUF_SIZE, 0);
+    recv(sock_, recv_text_, RECV_BUF_SIZE, 0);
     if (recv_text_[0] == 'f')
         std::cout << "目录设置失败！" << std::endl;
     else if (recv_text_[0] == 'o')
@@ -61,8 +61,8 @@ void FileClient::SetPath()
 
 void FileClient::GetDirectory()
 {
-    send(sock_, send_text_, 100202, 0);
-    recv(sock_, recv_text_, 100202, 0);
+    send(sock_, send_text_, SEND_BUF_SIZE, 0);
+    recv(sock_, recv_text_, RECV_BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
     else if (recv_text_[0] == 'f')
@@ -82,8 +82,8 @@ void FileClient::GetDirectory()
 
 void FileClient::DisplayPath()
 {
-    send(sock_, send_text_, 100202, 0);
-    recv(sock_, recv_text_, 100202, 0);
+    send(sock_, send_text_, SEND_BUF_SIZE, 0);
+    recv(sock_, recv_text_, RECV_BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
     else if (recv_text_[0] == 'o')
@@ -112,8 +112,8 @@ void FileClient::DownloadFile()
     {
         send_text_[i + 1] = file_name[i];
     }
-    send(sock_, send_text_, 100202, 0);
-    recv(sock_, recv_text_, 100202, 0);
+    send(sock_, send_text_, SEND_BUF_SIZE, 0);
+    recv(sock_, recv_text_, RECV_BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
     else if (recv_text_[0] == 'f')
@@ -189,8 +189,8 @@ void FileClient::UploadFile()
         std::cout << "文件打开失败" << std::endl;
         return;
     }
-    send(sock_, send_text_, 100202, 0);
-    recv(sock_, recv_text_, 100202, 0);
+    send(sock_, send_text_, SEND_BUF_SIZE, 0);
+    recv(sock_, recv_text_, RECV_BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
     else if (recv_text_[0] == 'f')

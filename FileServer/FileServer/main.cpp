@@ -3,6 +3,7 @@
 
 int main()
 {
-    FileServer().Run();
+    FileServer fileserver;
+    fileserver.Run();
     return 0;
 }

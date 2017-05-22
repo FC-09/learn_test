@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <thread>
 #include <windows.h>
+#include "../../public/common.h"
 #pragma comment(lib, "WS2_32.lib")
 
 class FileClient
@@ -21,7 +22,7 @@ private:
     SOCKET sock_;
     WSADATA wsa_data_;
     WORD sock_version_;
-    char recv_text_[100202];
-    char send_text_[100202];
+    char recv_text_[RECV_BUF_SIZE];
+    char send_text_[SEND_BUF_SIZE];
 };
 
