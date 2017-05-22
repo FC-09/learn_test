@@ -4,8 +4,8 @@
 FileClient::FileClient(FileServer* server, SOCKET sClient)
 {
     memset(path_, 0, sizeof(char) * 100);
-    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
-    memset(send_text_, 0, sizeof(char) * SEND_BUF_SIZE);
+    memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
+    memset(send_text_, 0, sizeof(char) * BUF_SIZE);
     client_ = sClient;
     server_ = server;
     std::thread recv(&FileClient::Run, this);
@@ -38,8 +38,8 @@ int FileClient::SetPath()
             std::cout << s_text << path_ << std::endl;
         }
     }
-    send(client_, send_text_, SEND_BUF_SIZE, 0);
-    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
+    send(client_, send_text_, BUF_SIZE, 0);
+    memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
     return 0;
 }
 
@@ -73,8 +73,8 @@ int FileClient::GetDirectory()
         }
         send_text_[0] = 'o';
     }
-    send(client_, send_text_, SEND_BUF_SIZE, 0);
-    memset(send_text_, 0, sizeof(char) * SEND_BUF_SIZE);
+    send(client_, send_text_, BUF_SIZE, 0);
+    memset(send_text_, 0, sizeof(char) * BUF_SIZE);
     return 0;
 }
 
@@ -85,7 +85,7 @@ int FileClient::DownloadFile()
         send_text_[0] = 'n';
         return -1;
     }
-    recv(client_, recv_text_, RECV_BUF_SIZE, 0);
+    recv(client_, recv_text_, BUF_SIZE, 0);
     //---------打开文件，保存并发送给客户端----------
     FILE *fr;
     if (fr = fopen(recv_text_, "rb"))
@@ -97,15 +97,15 @@ int FileClient::DownloadFile()
         send_text_[0] = 'f';
         return -3;
     }
-    send(client_, send_text_, SEND_BUF_SIZE, 0);
+    send(client_, send_text_, BUF_SIZE, 0);
     while (1)
     {
-        if (fread(send_text_, sizeof(char), 100, fr) == 0)
+        if (fread(send_text_, sizeof(char), BUF_SIZE, fr) == 0)
             break;
-        send(client_, send_text_, SEND_BUF_SIZE, 0);
+        send(client_, send_text_, BUF_SIZE, 0);
     }
     fclose(fr);
-    memset(recv_text_, 0, sizeof(char) * RECV_BUF_SIZE);
+    memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
     return 0;
 }
 
@@ -116,14 +116,14 @@ int FileClient::UploadFile()
         send_text_[0] = 'n';
         return -1;
     }
-    recv(client_, recv_text_, RECV_BUF_SIZE, 0);
+    recv(client_, recv_text_, BUF_SIZE, 0);
     if (FILE *fw = fopen(recv_text_, "wb"))
     {
         while (1)
         {
-            if (recv(client_, recv_text_, SEND_BUF_SIZE, 0) == 0)
+            if (recv(client_, recv_text_, BUF_SIZE, 0) == 0)
                 break;
-            fwrite(recv_text_, sizeof(char), SEND_BUF_SIZE, fw);
+            fwrite(recv_text_, sizeof(char), BUF_SIZE, fw);
         }
         fclose(fw);
         send_text_[0] = 'o';
@@ -132,7 +132,7 @@ int FileClient::UploadFile()
     {
         send_text_[0] = 'f';
     }
-    send(client_, send_text_, SEND_BUF_SIZE, 0);
+    send(client_, send_text_, BUF_SIZE, 0);
     return 0;
 }
 
@@ -151,7 +151,7 @@ int FileClient::Run()
 {
     while (1)
     {
-        recv(client_, recv_text_, RECV_BUF_SIZE, 0);
+        recv(client_, recv_text_, BUF_SIZE, 0);
         if (recv_text_[0] == 'S')
         {
             SetPath();
