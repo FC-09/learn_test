@@ -3,6 +3,8 @@
 
 FileClient::FileClient(FileServer* server, SOCKET sClient)
 {
+	printf("[0x%X] FileClient()\n", this);
+
     memset(path_, 0, sizeof(char) * 100);
     memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
     memset(send_text_, 0, sizeof(char) * BUF_SIZE);
@@ -14,7 +16,7 @@ FileClient::FileClient(FileServer* server, SOCKET sClient)
 
 FileClient::~FileClient()
 {
-    
+	printf("[0x%X] ~FileClient()\n", this);
 }
 
 int FileClient::SetPath()
@@ -97,10 +99,12 @@ int FileClient::DownloadFile()
         send_text_[0] = 'n';
         return -1;
     }
-    recv(client_, recv_text_, BUF_SIZE, 0);
+	char recvBuf[128 * 1024] = {0};
+    //recv(client_, recv_text_, BUF_SIZE, 0);
+	recv(client_, recvBuf, sizeof(recvBuf), 0);
     //---------打开文件，保存并发送给客户端----------
     FILE *fr;
-    if (fr = fopen(recv_text_, "rb"))
+    if (fr = fopen(recvBuf/*recv_text_*/, "rb"))
     {
         send_text_[0] = 'o';
     }
@@ -113,12 +117,20 @@ int FileClient::DownloadFile()
     memset(send_text_, 0, sizeof(char) * BUF_SIZE);
     while (1)
     {
-        if (fread(send_text_, sizeof(char), BUF_SIZE, fr) == 0)
-            break;
-        send(client_, send_text_, BUF_SIZE, 0);
+		/* if (fread(send_text_, sizeof(char), BUF_SIZE, fr) == 0)
+			 break;
+			 send(client_, send_text_, BUF_SIZE, 0);*/
+		int readLength = fread(send_text_, sizeof(char), BUF_SIZE, fr);
+		if (readLength <= 0)
+		{
+			send(client_, "download ok", strlen("download ok"), 0);
+			break;
+		}
+
+		send(client_, send_text_, readLength, 0);
     }
     fclose(fr);
-    memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
+    //memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
     return 0;
 }
 
@@ -155,30 +167,35 @@ int FileClient::Run()
 {
     while (1)
     {
-        recv(client_, recv_text_, BUF_SIZE, 0);
-        if (recv_text_[0] == 'S')
-        {
-            SetPath();
-        }
-        else if (recv_text_[0] == 'L')
-        {
-            GetDirectory();
-        }
-        else if (recv_text_[0] == 'D')
-        {
-            DownloadFile();
-        }
-        else if (recv_text_[0] == 'P')
-        {
-            UploadFile();
-        }
-        else if (recv_text_[0] == 'C')
-        {
-            DisplayPath();
-        }
-        else if (recv_text_[0] == 'Q')      //若客户端发送“Q”则表示断开连接
-            break;
+		if (recv(client_, recv_text_, BUF_SIZE, 0) > 0)
+		{
+			if (recv_text_[0] == 'S')
+			{
+				SetPath();
+			}
+			else if (recv_text_[0] == 'L')
+			{
+				GetDirectory();
+			}
+			else if (recv_text_[0] == 'D')
+			{
+				DownloadFile();
+			}
+			else if (recv_text_[0] == 'P')
+			{
+				UploadFile();
+			}
+			else if (recv_text_[0] == 'C')
+			{
+				DisplayPath();
+			}
+			else if (recv_text_[0] == 'Q')      //若客户端发送“Q”则表示断开连接
+				break;
+		}
+		else
+			break;
     }
     server_->RemoveClient(this);
+	printf("[0x%X] thread exit\n", this);
     return 0;
 }

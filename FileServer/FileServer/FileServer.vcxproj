@@ -52,10 +52,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\work\education\education\boost\boost_1_55_0</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\work\education\education\boost\boost_1_55_0\lib\Windows\vs2013</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,7 +81,6 @@
     <ClCompile Include="FileClient.cpp" />
     <ClCompile Include="FileServer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="设计说明.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileClient.h" />

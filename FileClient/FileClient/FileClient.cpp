@@ -117,9 +117,20 @@ void FileClient::DownloadFile()
         {
             while (1)
             {
-                if (recv(sock_, recv_text_, BUF_SIZE, 0) == 0)
-                    break;
-                fwrite(recv_text_, sizeof(char), 100, fw);
+				/*if (recv(sock_, recv_text_, BUF_SIZE, 0) == 0)
+					break;
+					fwrite(recv_text_, sizeof(char), 100, fw);*/
+
+				int recvLength = recv(sock_, recv_text_, BUF_SIZE, 0);
+				/*if (recv_text_ == "download ok")
+					break;*/
+
+				if(0 == memcmp(recv_text_, "download ok", strlen("download ok")))
+					break;
+				/*if(0 == strcmp(recv_text_, "download ok"))
+					break;*/
+
+				fwrite(recv_text_, sizeof(char), recvLength, fw);
             }
             fclose(fw);
             std::cout << "文件下载成功" << std::endl;
