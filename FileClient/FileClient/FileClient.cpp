@@ -46,11 +46,7 @@ void FileClient::SetPath()
     memset(path, 0, sizeof(char) * 100);
     std::cout << "请输入服务器中的当前目录：" << std::endl;
     std::cin >> path;
-    for (char i = 0; path[i] != 0; i++)
-    {
-        send_text_[i + 1] = path[i];
-    }
-    send(sock_, send_text_, BUF_SIZE, 0);
+    send(sock_, path, BUF_SIZE, 0);
     recv(sock_, recv_text_, BUF_SIZE, 0);
     if (recv_text_[0] == 'f')
         std::cout << "目录设置失败！" << std::endl;
@@ -61,7 +57,6 @@ void FileClient::SetPath()
 
 void FileClient::GetDirectory()
 {
-    send(sock_, send_text_, BUF_SIZE, 0);
     recv(sock_, recv_text_, BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
@@ -82,7 +77,6 @@ void FileClient::GetDirectory()
 
 void FileClient::DisplayPath()
 {
-    send(sock_, send_text_, BUF_SIZE, 0);
     recv(sock_, recv_text_, BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
@@ -109,11 +103,7 @@ void FileClient::DownloadFile()
     std::cin >> file_name;
     std::cout << "请输入要下载的本地路径" << std::endl;
     std::cin >> file_path;
-    for (char i = 0; file_name[i] != 0; i++)
-    {
-        send_text_[i + 1] = file_name[i];
-    }
-    send(sock_, send_text_, BUF_SIZE, 0);
+    send(sock_, file_name, BUF_SIZE, 0);
     recv(sock_, recv_text_, BUF_SIZE, 0);
     if (recv_text_[0] == 'n')
         std::cout << "未设置当前目录! " << std::endl;
@@ -152,7 +142,7 @@ void FileClient::UploadFile()
     std::cin >> file_name;
     std::cout << "请输入要上传的远程路径" << std::endl;
     std::cin >> file_path;
-    send(sock_, file_path, 100, 0);
+    send(sock_, file_path, BUF_SIZE, 0);
     if (FILE *fr = fopen(file_name, "rb"))
     {
         while (1)
@@ -180,6 +170,8 @@ void FileClient::UploadFile()
     {
         std::cout << "文件上传成功" << std::endl;
     }
+    memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
+    memset(send_text_, 0, sizeof(char) * BUF_SIZE);
     return;
 }
 
@@ -191,6 +183,7 @@ void FileClient::Run()
         {
             std::cout << "请输入命令：" << std::endl;
             std::cin >> send_text_;
+            send(sock_, send_text_, BUF_SIZE, 0);
             if (send_text_[0] == 'S')
             {
                 SetPath();
