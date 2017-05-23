@@ -19,24 +19,19 @@ FileClient::~FileClient()
 
 int FileClient::SetPath()
 {
-    if (recv_text_[1] != 0)
+    recv(client_, recv_text_, BUF_SIZE, 0);
+    strcpy(path_, recv_text_);
+    if (!boost::filesystem::exists(path_))
     {
-        for (char i = 1; recv_text_[i] != 0; i++)
-        {
-            path_[i - 1] = recv_text_[i];
-        }
-        if (!boost::filesystem::exists(path_))
-        {
-            memset(path_, 0, sizeof(char) * 100);
-            send_text_[0] = 'f';
-            return -2;
-        }
-        else
-        {
-            send_text_[0] = 'o';
-            char* s_text = "当前目录已设置为-> ";
-            std::cout << s_text << path_ << std::endl;
-        }
+        memset(path_, 0, sizeof(char) * 100);
+        send_text_[0] = 'f';
+        return -2;
+    }
+    else
+    {
+        send_text_[0] = 'o';
+        char* s_text = "当前目录已设置为-> ";
+        std::cout << s_text << path_ << std::endl;
     }
     send(client_, send_text_, BUF_SIZE, 0);
     memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
@@ -78,6 +73,23 @@ int FileClient::GetDirectory()
     return 0;
 }
 
+int FileClient::DisplayPath()
+{
+    if (path_ == 0)
+    {
+        send_text_[0] = 'n';
+        return -1;
+    }
+    else
+    {
+        send_text_[0] = 'o';
+        strcat(send_text_, path_);
+        send(client_, send_text_, BUF_SIZE, 0);
+        memset(send_text_, 0, sizeof(char) * BUF_SIZE);
+        return 0;
+    }
+}
+
 int FileClient::DownloadFile()
 {
     if (path_ == 0)
@@ -98,6 +110,7 @@ int FileClient::DownloadFile()
         return -3;
     }
     send(client_, send_text_, BUF_SIZE, 0);
+    memset(send_text_, 0, sizeof(char) * BUF_SIZE);
     while (1)
     {
         if (fread(send_text_, sizeof(char), BUF_SIZE, fr) == 0)
@@ -133,17 +146,8 @@ int FileClient::UploadFile()
         send_text_[0] = 'f';
     }
     send(client_, send_text_, BUF_SIZE, 0);
-    return 0;
-}
-
-int FileClient::DisplayPath()
-{
-    if (path_ == 0)
-    {
-        send_text_[0] = 'n';
-        return -1;
-    }
-    send(client_, path_, strlen(path_), 0);
+    memset(recv_text_, 0, sizeof(char) * BUF_SIZE);
+    memset(send_text_, 0, sizeof(char) * BUF_SIZE);
     return 0;
 }
 
