@@ -21,15 +21,16 @@ int Client::Run()
 {
     while (1)
     {
+        char buf = { 0 };
         boost::system::error_code ec;
-        client_->receive(boost::asio::buffer(buf_, sizeof(buf_)), 0, ec);
+        client_->receive(boost::asio::buffer(&buf, 1), 0, ec);
         if (ec.value() != 0)
             break;
-        std::cout << buf_ << std::endl;
-        //else if (buf_[0] == 'D')
-        //    {
-        //        DownloadFile();
-        //    }
+        //std::cout << buf_ << std::endl;
+        else if (buf == 'D')
+            {
+                DownloadFile();
+            }
         //else if (buf_[0] == 'P')
         //    {
         //        UploadFile();
@@ -45,7 +46,25 @@ int Client::Run()
 
 int Client::DownloadFile()
 {
-
+    char recvBuf[100] = { 0 };
+    client_->receive(boost::asio::buffer(recvBuf, sizeof(recvBuf)), 0);
+    FILE *fr;
+    if (fr = fopen(recvBuf, "rb"))
+    {
+        char text_buf[100] = { 0 };
+        while (1)
+        {
+            int readLength = fread(text_buf, sizeof(char), 100, fr);
+            if (readLength <= 0)
+            {
+                char* ok = "download ok";
+                client_->send(boost::asio::buffer(ok, sizeof("download ok")), 0);
+                break;
+            }   
+            client_->send(boost::asio::buffer(text_buf, readLength), 0);
+        }
+    }
+    fclose(fr);
     return 0;
 }
 

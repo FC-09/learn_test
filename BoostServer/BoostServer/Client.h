@@ -17,5 +17,5 @@ public:
 private:
     boost::asio::ip::tcp::socket* client_;
     BoostServer* server_;
-    char buf_[BUF_SIZE];
+    //char buf_[BUF_SIZE];
 };
