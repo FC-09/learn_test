@@ -74,7 +74,7 @@ int BoostClient::DownloadFile(boost::asio::ip::tcp::socket &client)
         client.receive(boost::asio::buffer(buf_, BUF_SIZE), 0, ec_);
         int len = buf_[0];
         strcpy(text_buf, buf_ + 1);
-        if (text_buf == "ok")
+        if (buf_ == "ok")
         {
             std::cout << "ÏÂÔØÍê±Ï" << std::endl;
             break;
