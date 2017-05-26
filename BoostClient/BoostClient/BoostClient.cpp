@@ -66,22 +66,29 @@ int BoostClient::DownloadFile(boost::asio::ip::tcp::socket &client)
     client.send(boost::asio::buffer(buf_, len_path + 2), 0, ec_);
     if (ec_.value() != 0)
         return -1;
-    FILE* f = fopen(c_file_path, "wb");;
-    while (1)
+    FILE* f;
+    if (f = fopen(c_file_path, "wb"))
     {
-        char text_buf[100] = { 0 };
-        memset(buf_, 0, BUF_SIZE);
-        client.receive(boost::asio::buffer(buf_, BUF_SIZE), 0, ec_);
-        int len = buf_[0];
-        strcpy(text_buf, buf_ + 1);
-        if (buf_ == "ok")
+        while (1)
         {
-            std::cout << "下载完毕" << std::endl;
-            break;
+            char text_buf[100] = { 0 };
+            memset(buf_, 0, BUF_SIZE);
+            client.receive(boost::asio::buffer(buf_, BUF_SIZE), 0, ec_);
+            int len = buf_[0];
+            std::cout << (len + 1) << std::endl;
+            //strcpy(text_buf, buf_ + 1);
+            memcpy(text_buf, buf_ + 1, len);
+            if (strcmp(buf_, "ok") == 0)
+            {
+                std::cout << "下载完毕" << std::endl;
+                break;
+            }
+            int l = fwrite(text_buf, sizeof(char), len, f);
+            std::cout << l << std::endl;
         }
-        fwrite(text_buf, sizeof(char), len, f);
+        fclose(f);
     }
-    fclose(f);
+    
     return 0;
 }
 
