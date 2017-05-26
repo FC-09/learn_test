@@ -14,6 +14,6 @@ public:
 private:
     std::list<Client*> client_mgr_;
     boost::asio::ip::tcp::socket* sock_;
-    boost::asio::io_service iosev;
-    boost::asio::ip::tcp::acceptor acceptor;
+    boost::asio::io_service iosev_;
+    boost::asio::ip::tcp::acceptor acceptor_;
 };

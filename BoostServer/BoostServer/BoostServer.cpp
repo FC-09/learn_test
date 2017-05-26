@@ -1,8 +1,8 @@
 #include "BoostServer.h"
 
 BoostServer::BoostServer()
-    :iosev(1)
-    , acceptor(iosev,
+    :iosev_(1)
+    , acceptor_(iosev_,
     boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 1234))
 {
 }
@@ -27,8 +27,8 @@ int BoostServer::Run()
 {
     while (1)
     {
-        boost::asio::ip::tcp::socket* p_sock = new boost::asio::ip::tcp::socket(iosev);
-        acceptor.accept(*p_sock);
+        boost::asio::ip::tcp::socket* p_sock = new boost::asio::ip::tcp::socket(iosev_);
+        acceptor_.accept(*p_sock);
         Client* client = new Client(this, p_sock);
         client_mgr_.push_back(client);
     }
