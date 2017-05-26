@@ -57,14 +57,16 @@ int Client::DownloadFile()
             char text[101] = { 0 };
             char readLength = fread(text_buf, sizeof(char), 100, fr);
             text[0] = readLength;
-            strcpy(text + 1, text_buf);
-            if (readLength <= 0)
+            //strcpy(text + 1, text_buf);
+            memcpy(text + 1, text_buf, readLength);
+            if ((int)readLength <= 0)
             {
                 char* ok = "ok";
                 client_->send(boost::asio::buffer(ok, sizeof("ok")), 0);
                 break;
             }   
             client_->send(boost::asio::buffer(text, readLength + 1), 0);
+            std::cout << (readLength + 1) << std::endl;
         }
     }
     fclose(fr);

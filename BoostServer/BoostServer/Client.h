@@ -2,7 +2,7 @@
 #include "boost/asio.hpp"
 #include <iostream>
 
-#define BUF_SIZE     100
+#define BUF_SIZE     101
 
 class BoostServer;
 class Client
