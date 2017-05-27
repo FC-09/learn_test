@@ -14,5 +14,5 @@ public:
     int UploadFile(boost::asio::ip::tcp::socket &client);
 private:
     boost::system::error_code ec_;
-    char buf_[BUF_SIZE];
+    //char buf_[BUF_SIZE];
 };
