@@ -5,8 +5,8 @@ Client::Client(BoostServer* server, boost::asio::ip::tcp::socket* client)
     :client_(client)
 {
     printf("[0x%X] FileClient()\n", this);
-    memset(recv_buf_, 0, BUF_SIZE);
-    memset(send_buf_, 0, BUF_SIZE);
+    /*memset(recv_buf_, 0, BUF_SIZE);
+    memset(send_buf_, 0, BUF_SIZE);*/
     server_ = server;
     std::thread thread_run(&Client::Run, this);
     thread_run.detach();
@@ -23,19 +23,19 @@ int Client::Run()
 {
     while (1)
     {
-        boost::system::error_code ec;
-        client_->receive(boost::asio::buffer(recv_buf_, 102), 0, ec);
-        if (ec.value() != 0)
+        char order = { 0 };
+        client_->receive(boost::asio::buffer(&order, 1), 0, ec_);
+        if (ec_.value() != 0)
             break;
-        else if (recv_buf_[0] == 'D')
+        else if (order == 'D')
             {
                 DownloadFile();
             }
-        else if (recv_buf_[0] == 'U')
+        else if (order == 'U')
             {
                 UploadFile();
             }
-        else if (recv_buf_[0] == 'Q')      //若客户端发送“Q”则表示断开连接
+        else if (order == 'Q')      //若客户端发送“Q”则表示断开连接
                 break;
     }
     server_->RemoveClient(this);
@@ -46,30 +46,23 @@ int Client::Run()
 
 int Client::DownloadFile()
 {
-    char file_path[100] = { 0 };
-    strcpy(file_path, recv_buf_ + 2);
-    FILE *fr;
-    if (fr = fopen(file_path, "rb"))
+    char file_path[256] = { 0 };
+    client_->receive(boost::asio::buffer(file_path, 256), 0, ec_);
+    if (FILE *fr = fopen(file_path, "rb"))
     {
         while (1)
         {
-            char text_buf[100] = { 0 };
-            char text[101] = { 0 };
-            char readLength = fread(text_buf, sizeof(char), 100, fr);
-            text[0] = readLength;
-            //strcpy(text + 1, text_buf);
-            memcpy(text + 1, text_buf, readLength);
-            if ((int)readLength <= 0)
-            {
-                char* ok = "ok";
-                client_->send(boost::asio::buffer(ok, sizeof("ok")), 0);
+            char text_buf[63*1024 + 4] = { 0 };
+            unsigned int readLength = fread(text_buf + 4, sizeof(char), 63 * 1024, fr);
+            std::cout << readLength << std::endl;
+            memcpy(text_buf, &readLength, sizeof(int));
+            int a = client_->send(boost::asio::buffer(text_buf, readLength + 4), 0, ec_);
+            std::cout << a << std::endl;
+            if (readLength <= 0)
                 break;
-            }   
-            client_->send(boost::asio::buffer(text, readLength + 1), 0);
-            std::cout << (readLength + 1) << std::endl;
         }
-    }
-    fclose(fr);
+        fclose(fr);
+    } 
     return 0;
 }
 
@@ -79,23 +72,3 @@ int Client::UploadFile()
     
     return 0;
 }
-
-
-//void Client::Recv()
-//{
-//    while (1)
-//    {
-//        char recvBuf[100] = { 0 };
-//        client_->receive(boost::asio::buffer(recvBuf, sizeof(recvBuf)), 0);
-//           char recvBuf[100] = { 0 };
-//    client_->recvive(boost::asio::buffer(recvBuf, sizeof(recvBuf)), );
-//    }
-//    
-//
-//}
-//
-//
-//void Client::Send()
-//{
-//
-//}

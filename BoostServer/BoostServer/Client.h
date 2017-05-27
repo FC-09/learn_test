@@ -13,12 +13,11 @@ public:
     int Run();
     int DownloadFile();
     int UploadFile();
-    //void Recv();
-    //void Send();
 
 private:
     boost::asio::ip::tcp::socket* client_;
+    boost::system::error_code ec_;
     BoostServer* server_;
-    char recv_buf_[BUF_SIZE];
-    char send_buf_[BUF_SIZE];
+    //char recv_buf_[BUF_SIZE];
+    //char send_buf_[BUF_SIZE];
 };
