@@ -3,6 +3,7 @@
 #include <iostream>
 
 #define BUF_SIZE     101
+#define SEND_BUF_SIZE	63*1024
 
 class BoostServer;
 class Client

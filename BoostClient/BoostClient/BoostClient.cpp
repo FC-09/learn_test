@@ -1,5 +1,5 @@
 #include "BoostClient.h"
-
+#include <stdio.h>
 BoostClient::BoostClient()
 {
     //memset(buf_, 0, BUF_SIZE);
@@ -7,6 +7,9 @@ BoostClient::BoostClient()
     boost::asio::ip::tcp::socket client(iosev);
     client.connect(boost::asio::ip::tcp::endpoint(
         boost::asio::ip::address_v4::from_string("127.0.0.1"), 1234), ec_);
+
+	boost::asio::socket_base::receive_buffer_size option(64 * 1024);
+	client.set_option(option);
     
     Run(client);
 }
@@ -67,24 +70,40 @@ int BoostClient::DownloadFile(boost::asio::ip::tcp::socket &client)
         return -1;
     if (FILE* f = fopen(c_file_path.c_str(), "wb"))
     {
-        char text_buf[63 * 1024 + 4] = { 0 };
-        int recv_len = 0;
+		char text_buf[BUF_SIZE + 4] = { 0 };
+		int recv_len = 0;
         while (1)
         {
-            recv_len = client.receive(boost::asio::buffer(text_buf + recv_len, 63 * 1024 + 4), 0, ec_);
+			recv_len = client.receive(boost::asio::buffer(text_buf + recv_len, BUF_SIZE + 4), 0, ec_);
+			static int recvCount = 0;
+			recvCount++;
+			static int totalRecvLength = 0;
+			totalRecvLength += recv_len;
+			if (20 == recvCount)
+				int k = 0;
+
+			printf("recv, recvLength = %d, %d, totalRecvLength = %d", recv_len, recvCount, totalRecvLength);
+
             std::cout << recv_len << std::endl;
             int len = 0;
             memcpy(&len, text_buf, sizeof(int));
-            if (len != (recv_len - 4))
+			if (len < (recv_len - 4))
+			{
+				memcpy(&len, text_buf + len + 4, sizeof(int));
+			}
+            else if (len != (recv_len - 4))
                 continue;
-            else if (len == 0)
+            if (len == 0)
             {
                 std::cout << "ÏÂÔØÍê±Ï" << std::endl;
                 break;
             }
             int l = fwrite(text_buf + 4, sizeof(char), len, f);
-            std::cout << l << std::endl;
-            memset(text_buf, 0, 63 * 1024 + 4);
+			static int totalWriteLength = 0;
+			totalWriteLength += l;
+			printf("=================, write file ,len = %d, length = %d, total = %d\n", len, l, totalWriteLength);
+            //std::cout << l << std::endl;
+			memset(text_buf, 0, BUF_SIZE + 4);
             recv_len = 0;
         }
         fclose(f);
