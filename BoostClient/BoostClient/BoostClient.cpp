@@ -82,7 +82,7 @@ int BoostClient::DownloadFile(boost::asio::ip::tcp::socket &client)
 			if (20 == recvCount)
 				int k = 0;
 
-			printf("recv, recvLength = %d, %d, totalRecvLength = %d", recv_len, recvCount, totalRecvLength);
+			printf("recv, recvLength = %d, %d, totalRecvLength = %d\n", recv_len, recvCount, totalRecvLength);
 
             std::cout << recv_len << std::endl;
             int len = 0;
