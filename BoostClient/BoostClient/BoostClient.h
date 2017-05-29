@@ -2,7 +2,7 @@
 #include <iostream>
 #include <thread>
 
-#define BUF_SIZE   63*1024
+#define BUF_SIZE   64*1024
 
 class BoostClient
 {
