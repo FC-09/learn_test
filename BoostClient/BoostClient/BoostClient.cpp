@@ -2,7 +2,6 @@
 #include <stdio.h>
 BoostClient::BoostClient()
 {
-    //memset(buf_, 0, BUF_SIZE);
     boost::asio::io_service iosev(1);
     boost::asio::ip::tcp::socket client(iosev);
     client.connect(boost::asio::ip::tcp::endpoint(
@@ -10,7 +9,7 @@ BoostClient::BoostClient()
 
 	boost::asio::socket_base::receive_buffer_size option(64 * 1024);
 	client.set_option(option);
-    
+
     Run(client);
 }
 
@@ -24,33 +23,16 @@ int BoostClient::Run(boost::asio::ip::tcp::socket &client)
 {
     while (1)
     {
-        //memset(buf_, 0, BUF_SIZE);
         char order;
         std::cout << "请输入指令" << std::endl;
         std::cin >> order;
         client.send(boost::asio::buffer(&order, 1), 0);
-        /*boost::system::error_code ec;
-        client.send(boost::asio::buffer(buf_, sizeof("hello world")), 0, ec);
-        if (ec.value() != 0)
-            return -1;*/
         if (order == 'D')
-        {
-            /*std::thread thread_download(&BoostClient::DownloadFile, this, client);
-            thread_download.detach();*/
             DownloadFile(client);
-        }
         else if (order == 'U')
-        {
-            /*std::thread thread_upload(&BoostClient::DownloadFile, this, client);
-            thread_upload.detach();*/
-            
             UploadFile(client);
-        }
         else if (order == 'Q')
-        {
-            
             break;
-        } 
     }
     client.close();
     std::cout << "与服务器连接已断开" << std::endl;
@@ -71,40 +53,49 @@ int BoostClient::DownloadFile(boost::asio::ip::tcp::socket &client)
     if (FILE* f = fopen(c_file_path.c_str(), "wb"))
     {
 		char text_buf[BUF_SIZE + 4] = { 0 };
+        char buf[BUF_SIZE + 4] = { 0 };
 		int recv_len = 0;
+        int old_recv_len = 0;
         while (1)
         {
-			recv_len = client.receive(boost::asio::buffer(text_buf + recv_len, BUF_SIZE + 4), 0, ec_);
-			static int recvCount = 0;
-			recvCount++;
-			static int totalRecvLength = 0;
-			totalRecvLength += recv_len;
-			if (20 == recvCount)
-				int k = 0;
-
-			printf("recv, recvLength = %d, %d, totalRecvLength = %d\n", recv_len, recvCount, totalRecvLength);
-
+			recv_len = client.receive(boost::asio::buffer(text_buf, BUF_SIZE + 4), 0, ec_);
             std::cout << recv_len << std::endl;
-            int len = 0;
-            memcpy(&len, text_buf, sizeof(int));
-			if (len < (recv_len - 4))
-			{
-				memcpy(&len, text_buf + len + 4, sizeof(int));
-			}
-            else if (len != (recv_len - 4))
-                continue;
-            if (len == 0)
+            if (old_recv_len != 0)
             {
-                std::cout << "下载完毕" << std::endl;
-                break;
+                if (recv_len > (BUF_SIZE + 4 - old_recv_len))
+                    memcpy(buf + old_recv_len, text_buf, BUF_SIZE + 4 - old_recv_len);
+                else
+                    memcpy(buf + old_recv_len, text_buf, recv_len);
             }
-            int l = fwrite(text_buf + 4, sizeof(char), len, f);
-			static int totalWriteLength = 0;
-			totalWriteLength += l;
-			printf("=================, write file ,len = %d, length = %d, total = %d\n", len, l, totalWriteLength);
-            //std::cout << l << std::endl;
-			memset(text_buf, 0, BUF_SIZE + 4);
-            recv_len = 0;
+            else
+            {
+                memcpy(buf, text_buf, recv_len);
+            } 
+            int len = 0;
+            memcpy(&len, buf, sizeof(int));
+            if (len == (strlen(buf) - 4))
+            {
+                if (len != 0)
+                {
+                    int l = fwrite(buf + 4, sizeof(char), len, f);
+                    std::cout << l << std::endl;
+                    memset(buf, 0, BUF_SIZE + 4);
+                    recv_len = 0;
+                    old_recv_len = 0;
+                }
+                else
+                {
+                    std::cout << "下载完毕" << std::endl;
+                    break;
+                }
+                if (recv_len > (BUF_SIZE + 4 - old_recv_len))
+                    memcpy(buf, text_buf + (BUF_SIZE + 4 - old_recv_len), recv_len - (BUF_SIZE + 4 - old_recv_len));
+            }
+            else
+            {
+                old_recv_len += recv_len;
+            }
+            memset(text_buf, 0, BUF_SIZE + 4);
         }
         fclose(f);
     }
