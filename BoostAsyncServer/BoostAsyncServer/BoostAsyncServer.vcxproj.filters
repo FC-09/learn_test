@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BoostServer.cpp">
+    <ClCompile Include="BoostAsyncServer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -78,6 +78,12 @@
   <ItemGroup>
     <ClCompile Include="BoostAsyncClient.cpp" />
     <ClCompile Include="BoostClient.cpp" />
+    <ClCompile Include="File.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BoostAsyncClient.h" />
+    <ClInclude Include="File.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
