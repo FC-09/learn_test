@@ -12,6 +12,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoostAsyncServer.cpp" />
+    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BoostAsyncServer.h" />
+    <ClInclude Include="Client.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{76CE43EA-7D1C-4F23-9385-DD90F7CDEEA6}</ProjectGuid>
