@@ -14,26 +14,26 @@ public:
 
     void StartConnect();
 
-    void ConnectHandler(boost::shared_ptr<boost::asio::ip::tcp::socket>& client, boost::system::error_code ec);
+    void ConnectHandler(boost::system::error_code ec);
 
-    void RecvHandler(boost::shared_ptr<boost::asio::ip::tcp::socket>& client,
-        boost::system::error_code ec, size_t bytes_transferred);    
+    void RecvHandler(boost::system::error_code ec, size_t bytes_transferred);    
 
-    void SendHandler(boost::shared_ptr<boost::asio::ip::tcp::socket>& client,
-        boost::system::error_code ec, size_t bytes_transferred);
+    void SendHandler(boost::system::error_code ec, size_t bytes_transferred);
 
-    void Start(boost::shared_ptr<boost::asio::ip::tcp::socket>&);
+    void Start();
 
-    int WriteFile();    
+    int WriteFile(int);    
 
-    int ReadFile();
+    //int ReadFile();
     
 private:
     boost::asio::io_service ios_;
     boost::asio::ip::tcp::endpoint ep_;
-    char recv_text_[BUF_SIZE];
+    boost::shared_ptr<boost::asio::ip::tcp::socket> client_;
+    char recv_text_[2*BUF_SIZE];
     char send_text_[BUF_SIZE];
     std::string s_file_path_;
     std::string c_file_path_;
+    int recv_text_len_;
     FILE* f;
 };

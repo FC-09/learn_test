@@ -1,10 +1,10 @@
 #pragma once
-#include "boost/asio.hpp" 
+#include "boost/asio.hpp"
 #include "boost/shared_ptr.hpp"
 #include <iostream>
 #define  BUF_SIZE  30*1024
 class BoostAsyncServer;
-class Client
+class Client :public std::enable_shared_from_this<Client>
 {
 public:
     Client(BoostAsyncServer*, boost::shared_ptr<boost::asio::ip::tcp::socket>&);
