@@ -37,6 +37,5 @@ private:
     std::string c_file_path_;
     int recv_text_len_;
     bool end_download_;
-    std::thread end_;
     FILE* f;
 };

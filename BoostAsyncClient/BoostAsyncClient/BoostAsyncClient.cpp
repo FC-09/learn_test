@@ -38,6 +38,7 @@ void BoostAsyncClient::ConnectHandler(boost::system::error_code ec)
 
 void BoostAsyncClient::Start()
 {
+    end_download_ = 0;
     std::cout << "请输入指令：" << std::endl;
     std::cin >> send_text_;
     if (send_text_[0] == 'D')
@@ -57,8 +58,7 @@ void BoostAsyncClient::Start()
             client_->async_send(boost::asio::buffer(send_text_, len + 2),
                 bind(&BoostAsyncClient::SendHandler, this, std::placeholders::_1, std::placeholders::_2));
             std::cout << "正在下载，请等待，如需中断下载，请输入1" << std::endl;
-            end_ = std::thread(&BoostAsyncClient::EndDownload,this);
-            end_.detach();
+            std::thread(&BoostAsyncClient::EndDownload, this).detach();
         }
         else
         {
@@ -70,10 +70,15 @@ void BoostAsyncClient::Start()
 
 void BoostAsyncClient::SendHandler(boost::system::error_code ec, size_t bytes_transferred)
 {
-    if (ec || end_download_)
+    if (ec)
     {
         std::cout << "连接断开" << std::endl;
         return;
+    }
+    if (end_download_)
+    {
+        std::cout << "下载已停止" << std::endl;
+        Start();
     }
     client_->async_receive(boost::asio::buffer(recv_text_, sizeof(send_text_)),
         bind(&BoostAsyncClient::RecvHandler, this, std::placeholders::_1, std::placeholders::_2));
@@ -81,18 +86,25 @@ void BoostAsyncClient::SendHandler(boost::system::error_code ec, size_t bytes_tr
 
 void BoostAsyncClient::RecvHandler(boost::system::error_code ec, size_t bytes_transferred)
 {
-    if (ec || end_download_)
+    if (ec)
     {
         std::cout << "连接断开" << std::endl;
         return;
     }
-    if (WriteFile(bytes_transferred))
+    if (end_download_)
     {
-        //_endthreadex(end_.get_id);
-        end_.~thread();
+        std::cout << "下载已停止" << std::endl;
         Start();
     }
-        
+    if (WriteFile(bytes_transferred))
+    {
+        while (1)
+        {
+            if (end_download_)
+                break;
+        }
+        Start();
+    }
     else
     {
         //std::cout << "接收前缓存数据" << recv_text_len_ << std::endl;
@@ -123,7 +135,7 @@ int BoostAsyncClient::WriteFile(int bytes_transferred)
     if (recv_file_len <= 0)
     {
         fclose(f);
-        std::cout << "下载完毕" << std::endl;
+        std::cout << "下载完毕，请输入1，结束下载检测" << std::endl;
         return 1;
     }
     return 0;
