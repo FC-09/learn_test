@@ -1,6 +1,7 @@
 #include "Boost/asio.hpp"
 #include <iostream>
 #include <string>
+#include <thread>
 #define  BUF_SIZE  30*1024
 
 class BoostAsyncClient
@@ -22,9 +23,9 @@ public:
 
     void Start();
 
-    int WriteFile(int);    
+    void EndDownload();
 
-    //int ReadFile();
+    int WriteFile(int);    
     
 private:
     boost::asio::io_service ios_;
@@ -35,5 +36,7 @@ private:
     std::string s_file_path_;
     std::string c_file_path_;
     int recv_text_len_;
+    bool end_download_;
+    std::thread end_;
     FILE* f;
 };
